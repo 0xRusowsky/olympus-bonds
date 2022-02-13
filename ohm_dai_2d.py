@@ -1,13 +1,14 @@
 import os
 import json
+import decimal
 from web3 import Web3
 import discord
 from discord.ext import commands, tasks
 from discord.app import Option
 from pycoingecko import CoinGeckoAPI
 
-BOT_TOKEN = os.environ["DISCORD_BOT_TOKEN_DAI_7D"]
-MARKET_ID = 17
+BOT_TOKEN = os.environ["DISCORD_BOT_TOKEN_OHMDAI"]
+MARKET_ID = 19
 
 # Initialize Discord client
 intents = discord.Intents.all()
@@ -33,6 +34,29 @@ def get_ohm_price(lp_address, basePrice=1):
         tokenPrice = (basePrice*get_reserves[1]/1e9)/get_reserves[0]
         
         return tokenPrice
+
+    except Exception as e:
+        print(e)
+
+
+def get_lp_price(lp_address, baseTokenPrice, pairTokenPrice, base_token_address="0x64aa3364F17a4D01c6f1751Fd97C2BD3D7e7f1D5"):
+    try:
+        lp_address = Web3.toChecksumAddress(lp_address)
+        LP_abi = json.loads('[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"sender","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount0","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount1","type":"uint256"},{"indexed":true,"internalType":"address","name":"to","type":"address"}],"name":"Burn","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"sender","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount0","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount1","type":"uint256"}],"name":"Mint","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"sender","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount0In","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount1In","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount0Out","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount1Out","type":"uint256"},{"indexed":true,"internalType":"address","name":"to","type":"address"}],"name":"Swap","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint112","name":"reserve0","type":"uint112"},{"indexed":false,"internalType":"uint112","name":"reserve1","type":"uint112"}],"name":"Sync","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[],"name":"DOMAIN_SEPARATOR","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"MINIMUM_LIQUIDITY","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"PERMIT_TYPEHASH","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"},{"internalType":"address","name":"","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"}],"name":"burn","outputs":[{"internalType":"uint256","name":"amount0","type":"uint256"},{"internalType":"uint256","name":"amount1","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"factory","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getReserves","outputs":[{"internalType":"uint112","name":"_reserve0","type":"uint112"},{"internalType":"uint112","name":"_reserve1","type":"uint112"},{"internalType":"uint32","name":"_blockTimestampLast","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_token0","type":"address"},{"internalType":"address","name":"_token1","type":"address"}],"name":"initialize","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"kLast","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"}],"name":"mint","outputs":[{"internalType":"uint256","name":"liquidity","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"nonces","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"},{"internalType":"uint256","name":"deadline","type":"uint256"},{"internalType":"uint8","name":"v","type":"uint8"},{"internalType":"bytes32","name":"r","type":"bytes32"},{"internalType":"bytes32","name":"s","type":"bytes32"}],"name":"permit","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"price0CumulativeLast","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"price1CumulativeLast","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"}],"name":"skim","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount0Out","type":"uint256"},{"internalType":"uint256","name":"amount1Out","type":"uint256"},{"internalType":"address","name":"to","type":"address"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"swap","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"sync","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"token0","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"token1","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}]')
+        LP = web3.eth.contract(address=lp_address, abi=LP_abi)
+
+        Reserves = LP.functions.getReserves().call()
+        Supply = LP.functions.totalSupply().call()
+        print(f'supply: {Supply}')
+        tokenZero = LP.functions.token0().call()
+        if tokenZero == base_token_address:
+            LPPrice = decimal.Decimal((Reserves[0]*baseTokenPrice + Reserves[1]*pairTokenPrice)/Supply)
+        else:
+            LPPrice = decimal.Decimal((Reserves[0]*pairTokenPrice + Reserves[1]*baseTokenPrice)/Supply)
+        print(f'baseToken Price: {baseTokenPrice}')
+        print(f'pairToken Price: {pairTokenPrice}')
+        print(f'SLP tokenPrice: {LPPrice}')
+        return(LPPrice)
 
     except Exception as e:
         print(e)
@@ -65,7 +89,9 @@ def maxDebtReached(bond_address, marketID):
         currentDebt = bond.functions.currentDebt(marketID).call()
         terms = bond.functions.terms(marketID).call()
         maxDebt, vesting = terms[-1], terms[-3]/3600/24
-        if currentDebt >= maxDebt:
+        info = bond.functions.market(marketID).call()
+        capacity, sold = terms[0], terms[-1]
+        if currentDebt >= maxDebt or sold >= capacity:
             return(True, vesting)
         else:
             return(False, vesting)
@@ -88,7 +114,7 @@ def marketClosed(bond_address, marketID):
         return(True)
 
     except Exception as e:
-        print("marketClosed error")
+        print("maxDebtReached error")
         print(e)    
 
 
@@ -97,7 +123,7 @@ def get_discounts():
     soldOut, vesting = maxDebtReached(bond_address='0x9025046c6fb25Fb39e720d97a8FD881ED69a1Ef6', marketID=MARKET_ID)
 
     if closed is True:
-        return(-1, vesting)
+        return(999, vesting)
 
     elif soldOut is True:
         return(-999, vesting)
@@ -108,8 +134,13 @@ def get_discounts():
         except:
             #retrieve prices from CoinGecko
             ohmPrice = cg.get_price(ids='olympus', vs_currencies='usd')['olympus']['usd']
+        
+        try:
+            lpPrice = get_lp_price(lp_address='0x055475920a8c93CfFb64d039A8205F7AcC7722d3', baseTokenPrice=ohmPrice, pairTokenPrice=1)
+        except Exception as e:
+            print(e)
 
-        bondDisc = bond_discount(bond_address='0x9025046c6fb25Fb39e720d97a8FD881ED69a1Ef6', marketID=MARKET_ID, ohmPrice=ohmPrice, quoteTokenPrice=1)
+        bondDisc = bond_discount(bond_address='0x9025046c6fb25Fb39e720d97a8FD881ED69a1Ef6', marketID=MARKET_ID, ohmPrice=ohmPrice, quoteTokenPrice=lpPrice)
         return(bondDisc, vesting)
 
 
@@ -127,18 +158,18 @@ async def check_discounts():
     for guild in client.guilds:
         guser = guild.get_member(client.user.id)
         try:
-            if bondDisc == -1:
+            if bondDisc == 999:
                 await guser.edit(nick=f'Bond Closed!')
-                await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'⛔ {vesting:.0f}d DAI Bonds'))
+                await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'⛔ {vesting:.0f}d FRAX Bonds'))
             if bondDisc == -999:
                 await guser.edit(nick=f'Sold Out!')
-                await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'⛔ {vesting:.0f}d DAI Bonds'))
+                await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'⛔ {vesting:.0f}d FRAX Bonds'))
             elif bondDisc < 0:
                 await guser.edit(nick=f'{-100*bondDisc:,.2f}% Premium')
-                await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'{vesting:.0f}d DAI Bonds'))
+                await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'{vesting:.0f}d FRAX Bonds'))
             else:
                 await guser.edit(nick=f'{100*bondDisc:,.2f}% Discount')
-                await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'{vesting:.0f}d DAI Bonds'))
+                await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'{vesting:.0f}d FRAX Bonds'))
 
         except Exception as e:
             print("check_discounts error")

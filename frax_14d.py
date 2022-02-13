@@ -64,7 +64,7 @@ def maxDebtReached(bond_address, marketID):
     
     try:
         currentDebt = bond.functions.currentDebt(marketID).call()
-        terms = bond.functions.terms().call(marketID)
+        terms = bond.functions.terms(marketID).call()
         maxDebt, vesting = terms[-1], terms[-3]/3600/24
         if currentDebt >= maxDebt:
             return(True, vesting)
@@ -96,11 +96,12 @@ def marketClosed(bond_address, marketID):
 
 
 def get_discounts():
-    marketClosed = marketClosed(bond_address='0x99E9b0a9dC965361C2CBc07525EA591761aEaA53', marketID=MARKET_ID)
-    soldOut, vesting = maxDebtReached(bond_address='0x99E9b0a9dC965361C2CBc07525EA591761aEaA53', marketID=MARKET_ID)
-
-    if marketClosed is True:
-        return(-1, vesting)
+    closed = marketClosed(bond_address='0x9025046c6fb25Fb39e720d97a8FD881ED69a1Ef6', marketID=MARKET_ID)
+    soldOut, vesting = maxDebtReached(bond_address='0x9025046c6fb25Fb39e720d97a8FD881ED69a1Ef6', marketID=MARKET_ID)
+    
+    if closed is True:
+        print('closed')
+        return(999, vesting)
 
     elif soldOut is True:
         return(-999, vesting)
@@ -112,7 +113,7 @@ def get_discounts():
             #retrieve prices from CoinGecko
             ohmPrice = cg.get_price(ids='olympus', vs_currencies='usd')['olympus']['usd']
 
-        bondDisc = bond_discount(bond_address='0x99E9b0a9dC965361C2CBc07525EA591761aEaA53', marketID=MARKET_ID, ohmPrice=ohmPrice, quoteTokenPrice=1)
+        bondDisc = bond_discount(bond_address='0x9025046c6fb25Fb39e720d97a8FD881ED69a1Ef6', marketID=MARKET_ID, ohmPrice=ohmPrice, quoteTokenPrice=1)
         return(bondDisc, vesting)
 
 
@@ -130,18 +131,18 @@ async def check_discounts():
     for guild in client.guilds:
         guser = guild.get_member(client.user.id)
         try:
-            if bondDisc = -1:
+            if bondDisc == 999:
                 await guser.edit(nick=f'Bond Closed!')
-                await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'⛔ {vesting}d FRAX Bonds'))
-            if bondDisc == -999:
+                await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'⛔ {vesting:.0f}d FRAX Bonds'))
+            elif bondDisc == -999:
                 await guser.edit(nick=f'Sold Out!')
-                await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'⛔ {vesting}d FRAX Bonds'))
+                await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'⛔ {vesting:.0f}d FRAX Bonds'))
             elif bondDisc < 0:
                 await guser.edit(nick=f'{-100*bondDisc:,.2f}% Premium')
-                await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'{vesting}d FRAX Bonds'))
+                await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'{vesting:.0f}d FRAX Bonds'))
             else:
                 await guser.edit(nick=f'{100*bondDisc:,.2f}% Discount')
-                await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'{vesting}d FRAX Bonds'))
+                await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=f'{vesting:.0f}d FRAX Bonds'))
 
         except Exception as e:
             print("check_discounts error")
